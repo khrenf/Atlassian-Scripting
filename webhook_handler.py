@@ -1,5 +1,6 @@
 from flask import Flask, request, abort
 from Jira_add_comment import add_comment
+#https://dashboard.ngrok.com/cloud-edge/endpoints
 
 app = Flask(__name__)
 
