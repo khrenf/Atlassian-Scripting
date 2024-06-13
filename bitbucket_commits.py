@@ -17,7 +17,7 @@ def get_commit_info(commit):
   }
 
   response = requests.request(
-    "GET",
+    "GET", 
     url,
     headers=headers
   )
