@@ -8,45 +8,41 @@ from Jira_add_comment import add_comment
 
 load_dotenv()
 bitbucket_key = os.getenv('BITBUCKET_KEY')
+def get_commit_info(commit):
 
-url = "https://api.bitbucket.org/2.0/repositories/kobyrenfert292/first/commits"
+  url = f"https://api.bitbucket.org/2.0/repositories/kobyrenfert292/first/commit/{commit}"
+  headers = {
+    "Accept": "application/json",
+    "Authorization": f"Bearer {bitbucket_key}"
+  }
 
-headers = {
-  "Accept": "application/json",
-  "Authorization": f"Bearer {bitbucket_key}"
-}
+  response = requests.request(
+    "GET",
+    url,
+    headers=headers
+  )
 
-response = requests.request(
-   "GET",
-   url,
-   headers=headers
-)
+  # print(json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": ")))
+  projects = {'TEST'}
 
-# print(json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": ")))
-projects = {'TEST'}
+  data = response.json()
 
-data = response.json()
-for commit in data['values']:
-    author = commit['author']['user']['display_name']
-    date = commit['date']
-    message = commit['message']
-    commit_url = commit['links']['html']['href']
+  author = data['author']['user']['display_name']
+  date = data['date']
+  message = data['message']
+  commit_url = data['links']['html']['href']
+
+  message_split = message.split()
+  for word in message_split:
+    parts = word.split('-')
+    for index, part in enumerate(parts):
+        if part.upper() in projects:
+            try: #check for first part of issue
+                issue = part.upper() + '-' + parts[index + 1]
+                add_comment(issue, f"Commit ({commit}) by: {author} on {date}  :: {message}")
+            except: #indicates the second part is not valid, so not a correct issue
+                continue 
     
-    # print(f"Author: {author}")
-    # print(f"Date: {date}")
-    # print(f"Message: {message}")
-    # print(f"URL: {commit_url}")
-    # print("-" * 40)
-
-    message = message.split() #split by spaces
-    issue = ''
-    for word in message:
-        parts = word.split('-')
-        for index, part in enumerate(parts):
-            if part.upper() in projects:
-                try: #check for first part of issue
-                    issue = part.upper() + '-' + parts[index + 1]
-                    add_comment(issue, f"updated by: {author} on {date}")
-                except: #indicates the second part is not valid, so not a correct issue
-                    continue 
+    
+get_commit_info("5f0f293")
                 
